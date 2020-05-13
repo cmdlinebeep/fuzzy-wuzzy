@@ -45,7 +45,7 @@ def create_app(test_config=None):
         return md_template
 
 
-    @app.route('/company', methods=['GET'])
+    @app.route('/companies', methods=['GET'])
     def get_companies():
         co_list = []
         companies = Company.query.all()
@@ -72,7 +72,7 @@ def create_app(test_config=None):
         return jsonify(data)
 
     
-    @app.route('/policy', methods=['GET'])
+    @app.route('/policies', methods=['GET'])
     def get_policies():
         pol_list = []
         policies = Policy.query.all()
@@ -111,13 +111,80 @@ def create_app(test_config=None):
         }
         return jsonify(data)
 
+    
+    @app.route('/company', methods=['POST'])
+    def add_company():
+        # FIXME: client role only
+        body = request.json
 
+        # Need to have name and website keys in body
+        if not all([ x in body for x in ['name', 'website'] ]):
+            abort(422)
+            # FIXME: make error handlers API form
+        
+        new_co = Company(name=body['name'].strip(), website=body['website'].strip())
 
+        try:
+            new_co.insert()
+        except Exception as e:
+            print(f'Exception in add_company(): {e}')
+            abort(422)  # Syntax is good, can't process for semantic reasons
 
+        return jsonify({
+            "id": new_co.id,
+            "success": True
+        })
 
+    
+    @app.route('/company/<int:company_id>', methods=['DELETE'])
+    def delete_company(company_id):
+        # Get the company to delete
+        goner_co = Company.query.get(company_id)
+        if not goner_co:
+            abort(404)
+        
+        id = goner_co.id    # Will lose this after delete
 
+        try:
+            goner_co.delete()
+        except Exception as e:
+            print(f'Exception in delete_company(): {e}')
+            abort(422)
 
+        return jsonify({
+            "id": id,
+            "success": True
+        })
+        
+    
+    @app.route('/policy/<int:policy_id>', methods=['PATCH'])
+    def edit_policy(policy_id):
+        # Get the policy to edit
+        policy = Policy.query.get(policy_id)
+        if not policy:
+            abort(404)  # FIXME
+        
+        body = request.json
 
+        # Check for name and body keys in the request payload
+        # Here it's allowable to only update one, or both, entries
+        if not any([ x in body for x in ['name', 'body'] ]):
+            abort(422)
+
+        if 'name' in body:
+            policy.name = body['name']
+        if 'body' in body:
+            policy.body = body['body']  # whoah
+        
+        try:
+            policy.update()
+        except Exception as e:
+            print(f'Exception in edit_policy(): {e}')
+            abort(422)
+        
+        return jsonify({
+            "success": True
+        })
 
 
     return app

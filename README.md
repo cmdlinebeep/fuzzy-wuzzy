@@ -100,8 +100,8 @@ The following contains a list of all the endpoints, as well as specific document
 | Method | Route                           | Short Description |
 |--------|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | GET    | /                               | Home page with API documentation |
-| GET    | /company                        | Returns a list of companies in the database (includes ids) |
-| GET    | /policy                         | Returns a list of list of available policy boilerplate |
+| GET    | /companies                        | Returns a list of companies in the database (includes ids) |
+| GET    | /policies                         | Returns a list of list of available policy boilerplate |
 | GET    | /rendered_policy/`<company_id>`/`<policy_id>` | Returns a company policy, rendered for that company |
 | POST   | /company                        | Create a new company.  **Client roles only** |
 | DELETE | /company/`<company_id>`         | Deletes a company from the database.  **Client roles only** |
@@ -114,10 +114,12 @@ The following contains a list of all the endpoints, as well as specific document
 - Returns: Rendered HTML
 
 
-## `GET /company`
+## `GET /companies`
 - Returns a list of companies in the database and accompanying information
 - Request Arguments: None
 - Returns: A list of JSON company data
+
+##### EXAMPLE `curl http://localhost:5000/companies`
 
 ```json
 {
@@ -144,10 +146,12 @@ The following contains a list of all the endpoints, as well as specific document
 ```
 
 
-## `GET /policy`
+## `GET /policies`
 - Returns a list of available policies (and associated boilerplate) to choose from
 - Request Arguments: None
 - Returns: A list of JSON policy boilerplate
+
+##### EXAMPLE `curl http://localhost:5000/policies`
 
 ```json
 {
@@ -180,6 +184,8 @@ The following contains a list of all the endpoints, as well as specific document
 - Request Arguments: `company_id`, `policy_id`
 - Returns: Site legalese in JSON format
 
+##### EXAMPLE `curl http://localhost:5000/rendered_policy/1/2`
+
 ```json
 {
     "policy": "Please heretofore find attached and in no undertain terms the Terms of Service for ACME, Inc. from herein referred to as THE COMPANY and blah blah blah...",
@@ -193,6 +199,10 @@ The following contains a list of all the endpoints, as well as specific document
 - **Client roles only**
 - Request Arguments: JSON formatted data
 - Returns: Success response and `company_id` that was created
+
+##### EXAMPLE `curl -X POST http://localhost:5000/company -H "Content-Type: application/json" -d '{"name": "Googolplex AtoZ Data", "website": "stopdoingevilwheneverconvenient.com"}'`
+
+##### EXAMPLE (Windows) `curl -X POST http://localhost:5000/company -H "Content-Type: application/json" -d "{\"name\": \"Googolplex AtoZ Data\", \"website\": \"stopdoingevilwheneverconvenient.com\"}"`
 
 Request Body Data:
 ```json
@@ -217,6 +227,8 @@ Returns:
 - Request Arguments: None
 - Returns: Success status and deleted `company_id`
 
+##### EXAMPLE `curl -X DELETE http://localhost:5000/company/52`
+
 ```json
 {
     "id": 52,
@@ -230,6 +242,10 @@ Returns:
 - **Admin roles only**
 - Request Arguments: JSON formatted data
 - Returns: Success status
+
+##### EXAMPLE `curl -X PATCH http://localhost:5000/policy/2 -H "Content-Type: application/json" -d '{"name": "Better Cookie Policy Name", "body": "We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?"}'`
+
+##### EXAMPLE (Windows) `curl -X PATCH http://localhost:5000/policy/2 -H "Content-Type: application/json" -d "{\"name\": \"Better Cookie Policy Name\", \"body\": \"We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?\"}"`
 
 Request Body Data:
 ```json
@@ -245,3 +261,13 @@ Returns:
     "success": true
 }
 ```
+
+You may also just update the `name` or `body` of the policy, leaving the other data intact.  
+
+EXAMPLE
+```json
+{
+    "name": "The MOST best Cookie Policy name"
+}
+```
+Will update `name` and leave `body` untouched.
