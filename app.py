@@ -10,6 +10,7 @@ import markdown.extensions.fenced_code  # Supports GitHub's backtick (```code```
 import markdown.extensions.codehilite   # Code highlighting: Python, JSON
 from pygments.formatters import HtmlFormatter
 
+# My modules
 from models import setup_db, Company, Policy
 
 
@@ -95,13 +96,11 @@ def create_app(test_config=None):
         company = Company.query.get(company_id)
         if not company:
             abort(404)
-            # FIXME: add API error handler here
-        
+            
         policy = Policy.query.get(policy_id)
         if not policy:
             abort(404)
-            # FIXME: add API error handler
-
+            
         # Fill in the placeholders {COMPANY} and {WEBSITE} with real data
         rendered_policy = policy.body.format(COMPANY=company.name, WEBSITE=company.website)
 
@@ -120,8 +119,7 @@ def create_app(test_config=None):
         # Need to have name and website keys in body
         if not all([ x in body for x in ['name', 'website'] ]):
             abort(422)
-            # FIXME: make error handlers API form
-        
+            
         new_co = Company(name=body['name'].strip(), website=body['website'].strip())
 
         try:
@@ -162,7 +160,7 @@ def create_app(test_config=None):
         # Get the policy to edit
         policy = Policy.query.get(policy_id)
         if not policy:
-            abort(404)  # FIXME
+            abort(404)
         
         body = request.json
 
@@ -185,6 +183,85 @@ def create_app(test_config=None):
         return jsonify({
             "success": True
         })
+
+    
+    ## Error Handling.  Returns tuple of JSON data and integer status code
+
+    '''
+        error handler should conform to general task above 
+    '''
+    # @app.errorhandler(AuthError)
+    # def auth_error(excpt):
+    #     # This decorator is called when an exception is thrown of AuthError type
+    #     # (unlike standard aborts which accept integer status error codes)
+    #     # This is for authentication errors only (our decorator)
+    #     response = jsonify(excpt.error)
+    #     response.status_code = excpt.status_code
+    #     return response
+
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        '''Server cannot process request due to client error, such as malformed request'''
+        return jsonify({
+            "success": False, 
+            "error": 400,
+            "message": "bad request"
+            }), 400
+
+    @app.errorhandler(401)
+    def unauthorized(error):
+        '''Authentication has not yet been provided'''
+        return jsonify({
+            "success": False, 
+            "error": 401,
+            "message": "unauthorized"
+            }), 401
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        '''Server is refusing action, often because user does not have permissions for request'''
+        return jsonify({
+            "success": False, 
+            "error": 403,
+            "message": "forbidden"
+            }), 403
+
+    @app.errorhandler(404)
+    def not_found(error):
+        '''Requested resource could not be found on the server'''
+        return jsonify({
+            "success": False, 
+            "error": 404,
+            "message": "not found"
+            }), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        '''Request method (i.e. GET or POST) is not allowed for this resource'''
+        return jsonify({
+            "success": False, 
+            "error": 405,
+            "message": "method not allowed"
+            }), 405
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        '''The request was well-formed but unable to be followed due to semantic errors'''
+        return jsonify({
+            "success": False, 
+            "error": 422,
+            "message": "unprocessable"
+            }), 422
+
+    @app.errorhandler(500)
+    def server_error(error):
+        '''Catch-all for server error on our end'''
+        return jsonify({
+            "success": False, 
+            "error": 500,
+            "message": "internal server error"
+            }), 500
 
 
     return app

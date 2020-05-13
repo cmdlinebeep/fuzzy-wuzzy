@@ -262,7 +262,7 @@ Returns:
 }
 ```
 
-You may also just update the `name` or `body` of the policy, leaving the other data intact.  
+You may also update just the `name` or `body` of the policy, leaving all other data intact.  
 
 EXAMPLE
 ```json
