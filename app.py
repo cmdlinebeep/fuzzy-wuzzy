@@ -26,7 +26,7 @@ def create_app(test_config=None):
     # Handle routes here
     # FIXME: Handle all routes without any authorization enforcement yet
 
-    @app.route('/')
+    @app.route('/', methods=['GET'])
     def index():
         # https://dev.to/mrprofessor/rendering-markdown-from-flask-1l41
         readme = open("README.md", "r")
@@ -45,7 +45,7 @@ def create_app(test_config=None):
         return md_template
 
 
-    @app.route('/company')
+    @app.route('/company', methods=['GET'])
     def get_companies():
         co_list = []
         companies = Company.query.all()
@@ -57,11 +57,10 @@ def create_app(test_config=None):
             # # e.g. pol_list = [3, 4] includes a Disclaimer and a Privacy Policy
             # for pol in policies:
             #     pol_list.append(pol.id)
-
             co_list.append({
-                "name": co.name,
-                "website": co.website,
                 "id": co.id,
+                "name": co.name,
+                "website": co.website
                 # "policies": pol_list
             })
 
@@ -71,6 +70,54 @@ def create_app(test_config=None):
             "success": True
         }
         return jsonify(data)
+
+    
+    @app.route('/policy', methods=['GET'])
+    def get_policies():
+        pol_list = []
+        policies = Policy.query.all()
+        for pol in policies:
+            pol_list.append({
+                "id": pol.id,
+                "name": pol.name,
+                "body": pol.body
+            })
+        
+        data = {
+            "policies": pol_list,
+            "success": False
+        }
+        return jsonify(data)
+    
+
+    @app.route('/rendered_policy/<int:company_id>/<int:policy_id>', methods=['GET'])
+    def get_rendered_policy(company_id, policy_id):
+        company = Company.query.get(company_id)
+        if not company:
+            abort(404)
+            # FIXME: add API error handler here
+        
+        policy = Policy.query.get(policy_id)
+        if not policy:
+            abort(404)
+            # FIXME: add API error handler
+
+        # Fill in the placeholders {COMPANY} and {WEBSITE} with real data
+        rendered_policy = policy.body.format(COMPANY=company.name, WEBSITE=company.website)
+
+        data = {
+            "policy": rendered_policy,
+            "success": True
+        }
+        return jsonify(data)
+
+
+
+
+
+
+
+
 
 
     return app
