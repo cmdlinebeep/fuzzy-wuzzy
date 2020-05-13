@@ -44,6 +44,15 @@ Create a virtual environment, and from within, run:
 
 ```bash
 source setup.sh
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+flask run
+```
+
+On Windows, environment variables are exported differently:
+```bash
+.\setup_windows.bat
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 flask run
 ```
@@ -63,7 +72,7 @@ All responses are returned in JSON format and all contain at the very least, a `
 
 When error codes are returned (e.g. `401`, `403`, etc.), they will return in a format like the following 404 example:
 
-```bash
+```json
 {
     "success": false,
     "error": 404,
@@ -81,10 +90,10 @@ The following contains a list of all the endpoints, as well as specific document
 |--------|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | GET    | /                               | Home page with API documentation                                                                                                                         |
 | GET    | /company                        | Returns a list of companies in the database, including company ids                                                                                         |
-| GET    | /<company_id>/<policy_id>       | Returns a company policy, rendered for that company                                                                                             |
+| GET    | /`<company_id>`/`<policy_id>`       | Returns a company policy, rendered for that company                                                                                             |
 | POST   | /company                        | Create a new company.  **Client roles only**                                                                                                             |
-| PATCH  | /policy/<policy_id> | Update the boilerplate text for a given policy.  **Admin roles only** |
-| DELETE | /company/<company_id>           | Deletes a company from the database.  **Client roles only**                                                                   |
+| PATCH  | /policy/`<policy_id>` | Update the boilerplate text for a given policy.  **Admin roles only** |
+| DELETE | /company/`<company_id>`           | Deletes a company from the database.  **Client roles only**                                                                   |
 
 
 ## Available Policy IDs
@@ -96,7 +105,7 @@ The following contains a list of all the endpoints, as well as specific document
 | `4`      | Privacy policy   |
 
 ##  `GET /`
-- Displays the home page with this API documentation.  Not intended to be called by API clients.
+- Displays the home page with this API documentation.  Not intended to be called by API clients but viewed by deverlopers in their browser.
 - Request Arguments: None
 - Returns: Rendered HTML
 
@@ -106,7 +115,7 @@ The following contains a list of all the endpoints, as well as specific document
 - Request Arguments: None
 - Returns: A list of JSON company data
 
-```bash
+```json
 {
     "companies": [
         {
@@ -140,7 +149,7 @@ The following contains a list of all the endpoints, as well as specific document
 - Request Arguments: `company_id`, `policy_id`
 - Returns: Site legalese in JSON format
 
-```bash
+```json
 {
     "policy": "Please heretofore find attached and in no undertain terms the Terms of Service for ACME, Inc. from herein referred to as THE COMPANY and blah blah blah...",
     "success": true
@@ -155,7 +164,7 @@ The following contains a list of all the endpoints, as well as specific document
 - Returns: Success response and `company_id` that was created
 
 Request Body Data:
-```bash
+```json
 {
     "name": "Googolplex AtoZ Data",
     "website": "stopdoingevilwheneverconvenient.com"
@@ -163,7 +172,7 @@ Request Body Data:
 ```
 
 Returns:
-```bash
+```json
 {
     "id": 52,
     "success": true
@@ -178,7 +187,7 @@ Returns:
 - Returns: Success status
 
 Request Body Data:
-```bash
+```json
 {
     "name": "Better Cookie Policy Name",
     "body": "We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?"
@@ -186,7 +195,7 @@ Request Body Data:
 ```
 
 Returns:
-```bash
+```json
 {
     "success": true
 }
@@ -199,7 +208,7 @@ Returns:
 - Request Arguments: None
 - Returns: Success status and deleted `company_id`
 
-```bash
+```json
 {
     "id": 52,
     "success": true

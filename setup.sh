@@ -1,14 +1,13 @@
-# Windows uses set, not set
+# For a standard Linux setup
+export AUTH0_DOMAIN='http://<FIXME>.auth0.com'
+export ALGORITHMS='RS256'
+export API_AUDIENCE='<FIXME>'
+export CLIENT_ID='<FIXME>'
 
-set AUTH0_DOMAIN='http://<FIXME>.auth0.com'
-set ALGORITHMS='RS256'
-set API_AUDIENCE='<FIXME>'
-set CLIENT_ID='<FIXME>'
+export client_token=FIXME
+export admin_token=FIXME
 
-set client_token=FIXME
-set admin_token=FIXME
+export DATABASE_URL = 'FIXME: db path here'
 
-set DATABASE_URL = 'FIXME: db path here'
-
-set FLASK_APP=app.py
-set FLASK_ENV=development
+export FLASK_APP=app.py
+export FLASK_ENV=development

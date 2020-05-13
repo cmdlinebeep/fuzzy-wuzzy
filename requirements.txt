@@ -1,4 +1,9 @@
-flask_script
-flask_migrate
+Flask
 psycopg2-binary
+Flask-Cors
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Script
+markdown
+pygments
 gunicorn
