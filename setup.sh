@@ -7,7 +7,7 @@ export CLIENT_ID='<FIXME>'
 export client_token=FIXME
 export admin_token=FIXME
 
-export DATABASE_URL = 'FIXME: db path here'
+export DATABASE_URL=postgres://postgres:a@localhost:5432/roboterms
 
 export FLASK_APP=app.py
 export FLASK_ENV=development

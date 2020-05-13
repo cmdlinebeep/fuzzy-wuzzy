@@ -8,7 +8,7 @@ set CLIENT_ID='<FIXME>'
 set client_token=FIXME
 set admin_token=FIXME
 
-set DATABASE_URL = 'FIXME: db path here'
+set DATABASE_URL=postgres://postgres:a@localhost:5432/roboterms
 
 set FLASK_APP=app.py
 set FLASK_ENV=development

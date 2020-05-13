@@ -46,7 +46,6 @@ Create a virtual environment, and from within, run:
 source setup.sh
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-flask run
 ```
 
 On Windows, environment variables are exported differently:
@@ -54,10 +53,20 @@ On Windows, environment variables are exported differently:
 .\setup_windows.bat
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-flask run
 ```
 
 Sourcing setup.sh sets environment variables needed by Auth0 and the Flask app.
+
+To set up the local database with some initial data, run the following:
+```bash
+createdb -U postgres roboterms
+psql -U postgres roboterms < trivia.psql
+```
+
+The database can then be explored via:
+```bash
+psql roboterms postgres
+```
 
 
 ## Running the Test Suite
