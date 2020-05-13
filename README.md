@@ -6,9 +6,11 @@ This is my capstone project submission for Udacity's Full-Stack web developer Na
 
 Nowadays, especially with passing of GPDR and other similar legislation, it's important that most commercial websites have a Privacy Policy, Terms of Service, or other site usage restrictions.  Consumers want to know, and deserve to know, what site owners are allowed to do with your data.
 
-Well, you can toss out your lawyer, because the RoboTerms API can quickly and easily generate such policies for your site automatically.  The API is pre-populated with boilerplate policies and you can pick-and-choose which you'd like to include.  Configure your company, and RoboTerms will populate the boilerplate with text specific to you.  
+Well, you can toss out your lawyer, because the RoboTerms API can quickly and easily generate such policies for your site automatically.  The API is pre-populated with several boilerplate policies to choose from.  Configure your company, and RoboTerms will populate the boilerplate with text specific to your company.
 
-Want to remove a policy or add a new one?  Easy.  Make your change, fetch the new policies from the API, and copy/paste the response text to your own site to update.
+Want to add a new policy to your site?  Easy.  Call the `rendered_policy` endpoint, and just paste the response text to your own site HTML.
+
+![Robot Scholar](https://github.com/cmdlinebeep/roboterms/blob/master/robo-scholar.jpg?raw=true)
 
 ### Policies Currently Supported
 - Terms of Service.  What are the terms users agree to when they use your site?  Prevent abuse of your site.
@@ -32,7 +34,7 @@ There are two roles supported by Roles Based Access Control (RBAC), **Clients** 
 
 **Admins** are the administrators of RoboTerms.  They have permissions to read any company profile, read individual policy boilerplate, and are also the only role that has permissions to create, edit, or delete individual policy boilerplate.  Of course, as you'd expect, they do not have permissions to edit company information (for example, which policies a company uses).
 
-*NOTE: Changes to the policy boilerplate are reflected immediately in the next `GET /<company_id>/<policy_id>`.*
+*NOTE: Changes to the policy boilerplate are reflected immediately in the next `GET /rendered_policy/<company_id>/<policy_id>`.*
 
 
 ## Authorization
@@ -60,7 +62,7 @@ Sourcing setup.sh sets environment variables needed by Auth0 and the Flask app.
 To set up the local database with some initial data, run the following:
 ```bash
 createdb -U postgres roboterms
-psql -U postgres roboterms < trivia.psql
+psql -U postgres roboterms < trivia.psql    # FIXME
 ```
 
 The database can then be explored via:
@@ -95,26 +97,19 @@ When error codes are returned (e.g. `401`, `403`, etc.), they will return in a f
 
 The following contains a list of all the endpoints, as well as specific documentation on each one.
 
-| Method | Route                           | Short Description                                                                                                                                        |
+| Method | Route                           | Short Description |
 |--------|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| GET    | /                               | Home page with API documentation                                                                                                                         |
-| GET    | /company                        | Returns a list of companies in the database, including company ids                                                                                         |
-| GET    | /`<company_id>`/`<policy_id>`       | Returns a company policy, rendered for that company                                                                                             |
-| POST   | /company                        | Create a new company.  **Client roles only**                                                                                                             |
-| PATCH  | /policy/`<policy_id>` | Update the boilerplate text for a given policy.  **Admin roles only** |
-| DELETE | /company/`<company_id>`           | Deletes a company from the database.  **Client roles only**                                                                   |
+| GET    | /                               | Home page with API documentation |
+| GET    | /company                        | Returns a list of companies in the database (includes ids) |
+| GET    | /policy                         | Returns a list of list of available policy boilerplate |
+| GET    | /rendered_policy/`<company_id>`/`<policy_id>` | Returns a company policy, rendered for that company |
+| POST   | /company                        | Create a new company.  **Client roles only** |
+| DELETE | /company/`<company_id>`         | Deletes a company from the database.  **Client roles only** |
+| PATCH  | /policy/`<policy_id>`           | Update the boilerplate text or name for a given policy.  **Admin roles only** |
 
-
-## Available Policy IDs
-| ID       |  Description     |
-|----------|------------------|
-| `1`      | Terms of Service |
-| `2`      | Cookie policy    |
-| `3`      | Disclaimer       |
-| `4`      | Privacy policy   |
 
 ##  `GET /`
-- Displays the home page with this API documentation.  Not intended to be called by API clients but viewed by deverlopers in their browser.
+- Displays the home page with this API documentation.  Not intended to be called by API clients, but rather viewed by developers in their browser.
 - Request Arguments: None
 - Returns: Rendered HTML
 
@@ -130,21 +125,18 @@ The following contains a list of all the endpoints, as well as specific document
         {
             "name": "ACME Inc.",
             "website": "acmerocks.com",
-            "id": 1,
-            "policies": [1, 3]
+            "id": 1
         },
         {
             "name": "RealCorp LLC.",
             "website": "soooreal.com",
-            "id": 2,
-            "policies": [2]
+            "id": 2
         },
         ... TRUNCATED FOR BREVITY ...
         {
             "name": "FaceSold",
             "website": "facesold.com",
-            "id": 70,
-            "policies": [3, 4]
+            "id": 70
         }
     ],
     "success": true
@@ -152,8 +144,38 @@ The following contains a list of all the endpoints, as well as specific document
 ```
 
 
-## `GET /<company_id>/<policy_id>`
-- Returns a rendered company policy
+## `GET /policy`
+- Returns a list of available policies (and associated boilerplate) to choose from
+- Request Arguments: None
+- Returns: A list of JSON policy boilerplate
+
+```json
+{
+    "policies": [
+        {
+            "id": 1,
+            "name": "Terms of Service",
+            "body": "TERMS OF SERVICE    These Terms of Service (\"Terms\") govern your access to and use of the website \"{WEBSITE}\" and all its services. <TRUNCATED>",
+        },
+        {
+            "id": 2,
+            "name": "Cookies Policy",
+            "body": "COOKIES POLICY    {COMPANY} (\"us\", \"we\", or \"our\") uses cookies on \"{WEBSITE}\" (the \"Service\"). By using the Service, you consent to the use of cookies. <TRUNCATED>",
+        },
+        ... TRUNCATED FOR BREVITY ...
+        {
+            "id": 4,
+            "name": "Privacy Policy",
+            "body": "PRIVACY POLICY    This statement (\"Privacy Policy\") covers the website {WEBSITE} owned and operated by {COMPANY} (\"we\", \"us\", \"our\") and all associated services. <TRUNCATED>",
+        }
+    ],
+    "success": true
+}
+```
+
+
+## `GET /rendered_policy/<company_id>/<policy_id>`
+- Returns a rendered company policy, with templated placeholders filled in for your company
 - Use this endpoint to capture instantiated legalese for pasting into your site
 - Request Arguments: `company_id`, `policy_id`
 - Returns: Site legalese in JSON format
@@ -189,8 +211,22 @@ Returns:
 ```
 
 
+## `DELETE /company/<company_id>`
+- Deletes a company from the database
+- **Client roles only**
+- Request Arguments: None
+- Returns: Success status and deleted `company_id`
+
+```json
+{
+    "id": 52,
+    "success": true
+}
+```
+
+
 ## `PATCH /policy/<policy_id>`
-- Update the boilerplate text for a given policy.
+- Update the boilerplate text or name for a given policy.
 - **Admin roles only**
 - Request Arguments: JSON formatted data
 - Returns: Success status
@@ -206,20 +242,6 @@ Request Body Data:
 Returns:
 ```json
 {
-    "success": true
-}
-```
-
-
-## `DELETE /company/<company_id>`
-- Deletes a company from the database
-- **Client roles only**
-- Request Arguments: None
-- Returns: Success status and deleted `company_id`
-
-```json
-{
-    "id": 52,
     "success": true
 }
 ```

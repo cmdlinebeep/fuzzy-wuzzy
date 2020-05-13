@@ -50,19 +50,19 @@ def create_app(test_config=None):
         co_list = []
         companies = Company.query.all()
         for co in companies:
-            # get policy objects for that company
-            policies = co.policies
-            pol_list = []
-            # go through them all and add to a list of policy ids company uses
-            # e.g. pol_list = [3, 4] includes a Disclaimer and a Privacy Policy
-            for pol in policies:
-                pol_list.append(pol.id)
+            # # get policy objects for that company
+            # policies = co.policies
+            # pol_list = []
+            # # go through them all and add to a list of policy ids company uses
+            # # e.g. pol_list = [3, 4] includes a Disclaimer and a Privacy Policy
+            # for pol in policies:
+            #     pol_list.append(pol.id)
 
             co_list.append({
                 "name": co.name,
                 "website": co.website,
                 "id": co.id,
-                "policies": pol_list
+                # "policies": pol_list
             })
 
         # Build overall response
