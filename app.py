@@ -109,15 +109,27 @@ def create_app(test_config=None):
     @requires_auth(permission='post:company')
     def add_company(payload):
         # FIXME: client role only
+        # print(request.headers)
+        
         body = request.json
 
         # Need to have name and website keys in body
         if not all([ x in body for x in ['name', 'website'] ]):
             abort(422)
-            
-        new_co = Company(name=body['name'].strip(), website=body['website'].strip())
+
+        # Here we want this to return None otherwise another company has that name
+        # If you don't handle this way, function works, but unittests catches the 
+        # print statement below in the 'except Exception as e' block and clutters
+        # up the unittests output.
+        duplicate_name = Company.query.filter_by(name=body['name'].strip()).one_or_none()
+        if duplicate_name:
+            abort(422)
+        duplicate_website = Company.query.filter_by(website=body['website'].strip()).one_or_none()
+        if duplicate_website:
+            abort(422)
 
         try:
+            new_co = Company(name=body['name'].strip(), website=body['website'].strip())
             new_co.insert()
         except Exception as e:
             print(f'Exception in add_company(): {e}')

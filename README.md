@@ -32,9 +32,12 @@ There are two roles supported by Roles Based Access Control (RBAC), **Clients** 
 
 Anyone is allowed to read company information, policy information, or to read a rendered policy view (public access).
 
-**Clients** are essentially the end users of the service.  In addition to public access, Clients can also create new companies and delete companies.
+**Clients** are essentially the end users of the service.  In addition to public access, Clients can also create new companies and delete companies.  In other words, Clients have permissions:
+- post:company
+- delete:company
 
-**Admins** are the administrators of RoboTerms.  In addition to having public access, they are the only role that has permissions to edit individual policy boilerplate.  Of course, as you'd expect, they do not have permissions to edit company information.
+**Admins** are the administrators of RoboTerms.  In addition to having public access, they are the only role that has permissions to edit individual policy boilerplate.  Of course, as you'd expect, they do not have permissions to edit company information.  Their permissions are therefore:
+- edit:policy
 
 *NOTE: Changes to the policy boilerplate are reflected immediately in the next `GET /rendered_policy/<company_id>/<policy_id>`.*
 
@@ -93,7 +96,7 @@ python test_app.py
 
 If you ever mess up the test database somehow and need to restore it to a pristine state for testing, run the following.  Note that the current unit tests do not change the state of the database (e.g. any DB entries created for testing are cleaned up by the script too.)  So you shouldn't ever really need this:
 ```bash
-dropdb roboterms_test & createdb roboterms_test
+dropdb -U postgres roboterms_test & createdb -U postgres roboterms_test
 psql -U postgres roboterms_test < roboterms_test.sql
 ```
 ``

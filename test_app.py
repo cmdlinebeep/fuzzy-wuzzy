@@ -4,6 +4,10 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 
 from app import create_app
+from models import Company, Policy
+#, pop_mock_companies, pop_policies
+# from models import test_db
+# Used to manually clean up messes the test makes
 # from models import setup_db, Company, Policy, pop_policies, pop_mock_companies
 
 # from app import APP
@@ -37,6 +41,25 @@ class RoboTermsTestsCase(unittest.TestCase):
         self.db.app = self.app
         self.db.init_app(self.app)
 
+
+        # Reset the test DB to a clean slate on each test run
+        # test_db(self.db)
+        # self.db.drop_all()
+        # self.db.create_all()  
+
+        # Add new companies
+        # new_co = Company(name="Green Cola, Inc.", website="gcola.com")
+        # new_co.insert()
+
+        # new_co = Company(name="Googolplex AtoZ Data", \
+        #     website="stopdoingevilwheneverconvenient.com")
+        # new_co.insert()
+
+        # new_co = Company(name="Spy App Inc.", website="spyonyourlovedones--butlovingly.com")
+        # new_co.insert()      
+        # pop_mock_companies()
+        # pop_policies()
+
         if not os.getenv('CLIENT_TOKEN'):
             raise RuntimeError("Environment variables are not set, did you source setup.sh?")
 
@@ -65,10 +88,10 @@ class RoboTermsTestsCase(unittest.TestCase):
 
 
         # new Company for testing
-        # self.new_co = {
-        #     "name": "Facesmash, LLC",
-        #     "website": "geturfacesmashed.biz"
-        # }
+        self.new_co = {
+            "name": "Facesmash, LLC",
+            "website": "geturfacesmashed.biz"
+        }
 
     def tearDown(self):
         """Executed after reach test"""
@@ -157,6 +180,49 @@ class RoboTermsTestsCase(unittest.TestCase):
         
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
+
+    def test_post_new_company(self):
+        """Attempts to create a new company as Client."""
+        res = self.client().post('/company', headers=self.headers_client, json=self.new_co)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        
+        # Delete the company we added directly through the DB session
+        Company.query.get(data['id']).delete()
+
+    def test_post_new_company_without_token(self):
+        """Attempts to create a new company without a token."""
+        res = self.client().post('/company', json=self.new_co)
+        
+        self.assertEqual(res.status_code, 401)  # Should return Unauthorized
+        
+    def test_post_existing_company(self):
+        """Attempts to create a new company with same name as existing one."""
+        existing_co = {
+            "name": "Spy App Inc.",
+            "website": "spyonyourlovedones--butlovingly.com"
+        }
+        res = self.client().post('/company', headers=self.headers_client, json=existing_co)
+        
+        self.assertEqual(res.status_code, 422)  # Unprocessable
+    
+    def test_post_company_missing_name(self):
+        """Attempts to create a new company but missing a name."""
+        new_co = {
+            "website": "abcdefghijklmnopqrstuvwxyz.gov"
+        }
+        res = self.client().post('/company', headers=self.headers_client, json=new_co)
+        
+        self.assertEqual(res.status_code, 422)  # Unprocessable
+
+    def test_post_company_as_admin(self):
+        """Attempts to create a new company as Admin."""
+        res = self.client().post('/company', headers=self.headers_admin, json=self.new_co)
+        
+        self.assertEqual(res.status_code, 403)  # Should return as Forbidden (invalid permissions)
+
 
 
 

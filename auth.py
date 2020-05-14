@@ -1,6 +1,6 @@
 import os
 import json
-from flask import request, _request_ctx_stack
+from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
@@ -59,6 +59,7 @@ def get_token_auth_header():
     
     # If we get here, take the token as-is
     token = parts[1]
+    # print(f'parts [0]: {parts[0]} and parts[1]: {parts[1]}')
     return token
 
 
@@ -78,7 +79,11 @@ def verify_decode_jwt(token):
     # Get the public keys for RSA from Auth0 here:
     json_url = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(json_url.read())
-    unverified_header = jwt.get_unverified_header(token)    # Gets the header, but hasn't verified anything (don't trust it!)
+    try:
+        unverified_header = jwt.get_unverified_header(token)    # Gets the header, but hasn't verified anything (don't trust it!)
+    except Exception as e:
+        print(f'Exception in verify_decode_jwt(): {e}')
+        abort(400)
     
     # We need to search for the RSA public key id ("kid") that matches the public keys
     # over at the Auth0.com/well-known/jwks.json link
@@ -209,10 +214,14 @@ def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            # print("in requires_auth")
             token = get_token_auth_header()
+            # print("..got token")
             payload = verify_decode_jwt(token)
+            # print("....verified token")
             check_permissions(permission, payload)
+            # print("......permissions checked OK")
             return f(payload, *args, **kwargs)
-
+        # FIXME: remove all print statements from this file after tests passing
         return wrapper
     return requires_auth_decorator
