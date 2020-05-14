@@ -59,7 +59,6 @@ def get_token_auth_header():
     
     # If we get here, take the token as-is
     token = parts[1]
-    # print(f'parts [0]: {parts[0]} and parts[1]: {parts[1]}')
     return token
 
 
@@ -222,6 +221,5 @@ def requires_auth(permission=''):
             check_permissions(permission, payload)
             # print("......permissions checked OK")
             return f(payload, *args, **kwargs)
-        # FIXME: remove all print statements from this file after tests passing
         return wrapper
     return requires_auth_decorator

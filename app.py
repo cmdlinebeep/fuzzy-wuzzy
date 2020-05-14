@@ -26,9 +26,6 @@ def create_app(test_config=None):
 
     # FIXME:  migrate = Migrate(app, db)  ?
 
-    # Handle routes here
-    # FIXME: Handle all routes without any authorization enforcement yet
-
     @app.route('/', methods=['GET'])
     def index():
         # https://dev.to/mrprofessor/rendering-markdown-from-flask-1l41
@@ -108,9 +105,6 @@ def create_app(test_config=None):
     @app.route('/company', methods=['POST'])
     @requires_auth(permission='post:company')
     def add_company(payload):
-        # FIXME: client role only
-        # print(request.headers)
-        
         body = request.json
 
         # Need to have name and website keys in body

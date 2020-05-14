@@ -99,7 +99,16 @@ If you ever mess up the test database somehow and need to restore it to a pristi
 dropdb -U postgres roboterms_test & createdb -U postgres roboterms_test
 psql -U postgres roboterms_test < roboterms_test.sql
 ```
-``
+
+EXAMPLE
+```bash
+(venv) λ python test_app.py                                                                 
+........................                                                                    
+----------------------------------------------------------------------                      
+Ran 24 tests in 5.756s                                                                      
+                                                                                            
+OK
+```                                                                                    
 
 
 ## Check out a [live deployment on Heroku](FIXME)
