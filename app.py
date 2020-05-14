@@ -80,7 +80,7 @@ def create_app(test_config=None):
         
         data = {
             "policies": pol_list,
-            "success": False
+            "success": True
         }
         return jsonify(data)
     

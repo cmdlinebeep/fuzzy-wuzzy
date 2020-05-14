@@ -32,10 +32,23 @@ class RoboTermsTestsCase(unittest.TestCase):
 
         self.app.config["SQLALCHEMY_DATABASE_URI"] = self.database_path # FIXME: combine above
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-        
+
         self.db = SQLAlchemy()
         self.db.app = self.app
         self.db.init_app(self.app)
+
+        if not os.getenv('CLIENT_TOKEN'):
+            raise RuntimeError("Environment variables are not set, did you source setup.sh?")
+
+        self.headers_client = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + os.getenv('CLIENT_TOKEN')
+        }
+
+        self.headers_admin = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + os.getenv('ADMIN_TOKEN')
+        }
 
         # self.db.drop_all()
         # self.db.create_all()        
@@ -63,29 +76,105 @@ class RoboTermsTestsCase(unittest.TestCase):
 
 
     # Unit Tests
+
     # At least two per endpoint
 
-    def test_get_index(self):
-        """Gets the / endpoint and checks valid results"""
+    # For the simple GET endpoints (/, /companies, /policies), test both as a public user 
+    # (no 'Authorization' header), and as a member (with header).  
+    # Header should not break the public access.
+    def test_get_index_public(self):
+        """Gets the / endpoint as public user and checks valid results"""
         res = self.client().get('/')
 
-        # Here we'll count this as the two tests since this is an extra endpoint 
-        # and not much more to test with it    
         self.assertEqual(res.status_code, 200)
         self.assertEqual("This is my capstone project" in res.get_data(as_text=True), True)
 
-    def test_get_all_companies(self):
-        """Gets all companies."""
+    def test_get_index_member(self):
+        """Gets the / endpoint as a member and checks valid results"""
+        res = self.client().get('/', headers=self.headers_client)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual("This is my capstone project" in res.get_data(as_text=True), True)
+
+    def test_get_all_companies_public(self):
+        """Gets all companies as a public user and checks status and count."""
         res = self.client().get('/companies')
         data = json.loads(res.data)
-        print(data)
+        
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['companies']), 3)
 
-        # self.assertEqual(data['total_questions'], 19)
-        # self.assertEqual(len(data['questions']), 10)
-        # self.assertEqual(data['questions'][0]['id'], 5)
+    def test_get_all_companies_member(self):
+        """Gets all companies as a member and checks status and count."""
+        res = self.client().get('/companies', headers=self.headers_client)
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(len(data['companies']), 3)
+
+    def test_get_all_policies_public(self):
+        """Gets all policies as a public user and checks status and count."""
+        res = self.client().get('/policies')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(len(data['policies']), 4)
+
+    def test_get_all_policies_member(self):
+        """Gets all policies as a public user and checks status and count."""
+        res = self.client().get('/policies', headers=self.headers_client)
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(len(data['policies']), 4)
+
+    def test_get_rendered_policy_valid(self):
+        """Gets a valid rendered policy."""
+        res = self.client().get('/rendered_policy/1/1')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual("TERMS OF SERVICE" in data['policy'], True)
+        self.assertEqual("gcola.com" in data['policy'], True)
+
+    def test_get_rendered_policy_invalid_company(self):
+        """Attempts to get the rendered policy for an invalid company id."""
+        res = self.client().get('/rendered_policy/1000/1')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        
+    def test_get_rendered_policy_invalid_policy(self):
+        """Attempts to get the rendered policy for an invalid policy id."""
+        res = self.client().get('/rendered_policy/1/1000')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+
+
+
+    # Test error handlers
+    def test_404(self):
+        """Test 404 error handler is API'd"""
+        res = self.client().get('/companies/abcdefghijk')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('error', data)
+        self.assertEqual(data['success'], False)
+        
+
+
+
+
 
     # def test_pagination(self):
     #     """Tests the pagination by getting page 2 and looking for known features"""

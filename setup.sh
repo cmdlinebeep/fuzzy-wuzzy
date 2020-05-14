@@ -5,8 +5,8 @@ export ALGORITHMS=RS256
 export API_AUDIENCE=roboterms_api
 export CLIENT_APP_ID=as0gsfCWGX2cQc8yISq2mjBDljvrNiWz
 
-export client_token=FIXME
-export admin_token=FIXME
+export CLIENT_TOKEN=FIXME
+export ADMIN_TOKEN=FIXME
 
 export DATABASE_URL=postgres://postgres:a@localhost:5432/roboterms
 
