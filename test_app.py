@@ -223,6 +223,50 @@ class RoboTermsTestsCase(unittest.TestCase):
         
         self.assertEqual(res.status_code, 403)  # Should return as Forbidden (invalid permissions)
 
+    def test_delete_company(self):
+        """Attempts to delete a company successfully as Client."""
+        # Create a test company to delete
+        new_co = Company(name="we're toast, LLC", website="dooooooooooommmmed.com")
+        new_co.insert()
+        new_co_id = new_co.id
+
+        # Make sure it added successfully
+        all_companies = Company.query.all()
+        self.assertEqual(len(all_companies), 4)    # 3 originally in test DB
+
+        # Delete it through route
+        res = self.client().delete(f'/company/{new_co_id}', headers=self.headers_client)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['id'], new_co_id)
+
+    def test_nonexistent_company(self):
+        """Attempts to delete a company that doesn't exist."""
+        res = self.client().delete(f'/company/1000', headers=self.headers_client)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)  # Not Found
+        self.assertEqual(data['success'], False)
+        
+    def test_delete_company_without_credentials(self):
+        """Attempts to delete a company without any credentials."""
+        res = self.client().delete(f'/company/1')
+        data = json.loads(res.data)
+
+        # AuthError throw different JSON format, no 'success' key
+        self.assertEqual(res.status_code, 401)  # Unauthorized
+        self.assertEqual(data['code'], "missing_auth_header")
+
+    def test_delete_company_wrong_role(self):
+        """Attempts to delete a company with a role that doesn't have correct permissions."""
+        res = self.client().delete(f'/company/1', headers=self.headers_admin)
+        data = json.loads(res.data)
+
+        # AuthError throw different JSON format, no 'success' key
+        self.assertEqual(res.status_code, 403)  # Forbidden
+        self.assertEqual(data['code'], "forbidden")
 
 
 
