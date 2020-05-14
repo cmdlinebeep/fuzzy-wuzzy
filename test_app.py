@@ -242,7 +242,7 @@ class RoboTermsTestsCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(data['id'], new_co_id)
 
-    def test_nonexistent_company(self):
+    def test_delete_nonexistent_company(self):
         """Attempts to delete a company that doesn't exist."""
         res = self.client().delete(f'/company/1000', headers=self.headers_client)
         data = json.loads(res.data)
@@ -268,6 +268,66 @@ class RoboTermsTestsCase(unittest.TestCase):
         self.assertEqual(res.status_code, 403)  # Forbidden
         self.assertEqual(data['code'], "forbidden")
 
+    def test_update_policy(self):
+        """Attempts to update a policy successfully as an Admin."""
+        # Get current name of policy 1
+        pol_1 = Policy.query.get(1)
+        orig_name = pol_1.name
+
+        # Change the policy name to FOOBAZ
+        res = self.client().patch('/policy/1', headers=self.headers_admin, json={"name": "FOOBAZ"})
+        data = json.loads(res.data)
+
+        # Check that it updated OK
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+        # Fetch from the /policies endpoint to make sure the name changed
+        res = self.client().get('/policies')
+        data = json.loads(res.data)
+        
+        self.assertEqual(len(data['policies']), 4)  # Make sure length of /policies remains the same
+        self.assertNotEqual(orig_name, data['policies'][0]['name'])
+
+        # Now put the name back
+        res = self.client().patch('/policy/1', headers=self.headers_admin, json={"name": "Terms of Service"})
+        
+        # And fetch new policies
+        res = self.client().get('/policies')
+        data = json.loads(res.data)
+
+        # Check that it updated OK
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        for policy in data['policies']: # Can't count on ordering
+            if policy['id'] == 1:
+                updated_name = policy['name']
+                break
+        self.assertEqual(updated_name, "Terms of Service")
+
+    def test_update_nonexistent_policy(self):
+        """Attempts to update a policy that doesn't exist."""
+        res = self.client().patch('/policy/1000', headers=self.headers_admin, json={"name": "FOOBAZ"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)  # Not Found
+        self.assertEqual(data['success'], False)
+
+    def test_update_policy_without_credentials(self):
+        """Attempts to update a policy without credentials."""
+        res = self.client().patch('/policy/1', json={"name": "FOOBAZ"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)  # Unauthorized
+        self.assertEqual(data['code'], "missing_auth_header")
+
+    def test_update_policy_wrong_credentials(self):
+        """Attempts to update a policy with incorrect credentials."""
+        res = self.client().patch('/policy/1', headers=self.headers_client, json={"name": "FOOBAZ"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 403)  # Forbidden
+        self.assertEqual(data['code'], "forbidden")
 
 
 
