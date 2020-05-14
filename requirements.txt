@@ -6,4 +6,5 @@ Flask-Migrate
 Flask-Script
 markdown
 pygments
+python-jose-cryptodome
 gunicorn

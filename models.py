@@ -30,20 +30,6 @@ def setup_db(app, database_path=database_path):
         pop_mock_companies()    # See below.  Used only during development.
 
 
-# '''NOTE: Relationship between Company and Policy is many-to-many.  Companies
-# can have many policies, and policies can belong to many companies.  Here we'll
-# choose to define the Company as the parent and Policy as the child.'''
-# # Association table for Policy to Company (many-to-many)
-# # Defining the Policy as the child here, doesn't really matter
-# # This table is defined outside of the other models!
-# No longer maintaining a many-to-many relationship, can just render without "attaching" policies
-# FIXME: delete this code later after sure not going back this direction
-# company_policy_table = db.Table('company_policy_table',
-#     db.Column('policy_id', db.Integer, db.ForeignKey('Policy.id'), primary_key=True),
-#     db.Column('company_id', db.Integer, db.ForeignKey('Company.id'), primary_key=True)    
-# )
-
-
 class Company(db.Model):
     __tablename__ = 'Company'
     # Autoincrementing, unique primary key
@@ -51,12 +37,6 @@ class Company(db.Model):
     
     name = db.Column(db.String(80), unique=True, nullable=False)
     website = db.Column(db.String(80), unique=True, nullable=False)
-
-    # # Here is where we link the associative table for the many-to-many relationship with Policy
-    # policies = db.relationship('Policy', secondary=company_policy_table, backref=db.backref('companies'))
-    # # 'secondary' links this to the associative (m2m) table
-    # # 'relationship' statement above allows us to make references like: company_obj.policies
-    # # 'backref' creates an attribute on Company objects so we can reference: policy_obj.companies
 
     def __repr__(self):
         return f"Company object with name: {self.name} and site: {self.website}"
@@ -141,7 +121,7 @@ def pop_policies():
     # Use placeholders {WEBSITE} and {COMPANY} which will fill in later
 
     # NOTE: These policies are extremely abbreviated and just for a homework assignment.
-    # DO NOT USE THEM FOR ANY COMMERCIAL PRODUCTS!  I am not a lawyer.
+    # DO NOT USE THEM FOR ANY COMMERCIAL PRODUCTS!  Also, I am not a lawyer.
 
     tos = Policy(name="Terms of Service", body='''
         TERMS OF SERVICE
@@ -230,5 +210,5 @@ def pop_mock_companies():
         website="stopdoingevilwheneverconvenient.com")
     new_co.insert()
 
-    new_co = Company(name="Spy App Inc.", website="spyonyourlovedones,butlovingly.com")
+    new_co = Company(name="Spy App Inc.", website="spyonyourlovedones--butlovingly.com")
     new_co.insert()

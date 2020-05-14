@@ -12,12 +12,14 @@ from pygments.formatters import HtmlFormatter
 
 # My modules
 from models import setup_db, Company, Policy
-
+from auth import AuthError, requires_auth
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     CORS(app)   # Allow all origins
+
+    # FIXME: add access-control-allow authorization header?  Like coffee shop project.
 
     # Set up the database first
     setup_db(app)
@@ -51,18 +53,10 @@ def create_app(test_config=None):
         co_list = []
         companies = Company.query.all()
         for co in companies:
-            # # get policy objects for that company
-            # policies = co.policies
-            # pol_list = []
-            # # go through them all and add to a list of policy ids company uses
-            # # e.g. pol_list = [3, 4] includes a Disclaimer and a Privacy Policy
-            # for pol in policies:
-            #     pol_list.append(pol.id)
             co_list.append({
                 "id": co.id,
                 "name": co.name,
                 "website": co.website
-                # "policies": pol_list
             })
 
         # Build overall response
@@ -112,7 +106,8 @@ def create_app(test_config=None):
 
     
     @app.route('/company', methods=['POST'])
-    def add_company():
+    @requires_auth(permission='post:company')
+    def add_company(payload):
         # FIXME: client role only
         body = request.json
 
@@ -135,7 +130,8 @@ def create_app(test_config=None):
 
     
     @app.route('/company/<int:company_id>', methods=['DELETE'])
-    def delete_company(company_id):
+    @requires_auth(permission='delete:company')
+    def delete_company(payload, company_id):
         # Get the company to delete
         goner_co = Company.query.get(company_id)
         if not goner_co:
@@ -156,7 +152,8 @@ def create_app(test_config=None):
         
     
     @app.route('/policy/<int:policy_id>', methods=['PATCH'])
-    def edit_policy(policy_id):
+    @requires_auth(permission='edit:policy')
+    def edit_policy(payload, policy_id):
         # Get the policy to edit
         policy = Policy.query.get(policy_id)
         if not policy:
@@ -190,14 +187,14 @@ def create_app(test_config=None):
     '''
         error handler should conform to general task above 
     '''
-    # @app.errorhandler(AuthError)
-    # def auth_error(excpt):
-    #     # This decorator is called when an exception is thrown of AuthError type
-    #     # (unlike standard aborts which accept integer status error codes)
-    #     # This is for authentication errors only (our decorator)
-    #     response = jsonify(excpt.error)
-    #     response.status_code = excpt.status_code
-    #     return response
+    @app.errorhandler(AuthError)
+    def auth_error(excpt):
+        # This decorator is called when an exception is thrown of AuthError type
+        # (unlike standard aborts which accept integer status error codes)
+        # This is for authentication errors only (our decorator)
+        response = jsonify(excpt.error)
+        response.status_code = excpt.status_code
+        return response
 
 
     @app.errorhandler(400)

@@ -30,9 +30,11 @@ The **Policy** model contains individual policy boilerplate sections.  For examp
 ## Roles and Permissions
 There are two roles supported by Roles Based Access Control (RBAC), **Clients** and **Admins**.  
 
-**Clients** are essentially the end users of the service.  Clients can read any company profile, can read individual policy boilerplate (generic), and of course can read their finalized (non-generic) final policies for including in their sites.  Clients can also add and remove policies to and from their company.
+Anyone is allowed to read company information, policy information, or to read a rendered policy view (public access).
 
-**Admins** are the administrators of RoboTerms.  They have permissions to read any company profile, read individual policy boilerplate, and are also the only role that has permissions to create, edit, or delete individual policy boilerplate.  Of course, as you'd expect, they do not have permissions to edit company information (for example, which policies a company uses).
+**Clients** are essentially the end users of the service.  In addition to public access, Clients can also create new companies and delete companies.
+
+**Admins** are the administrators of RoboTerms.  In addition to having public access, they are the only role that has permissions to edit individual policy boilerplate.  Of course, as you'd expect, they do not have permissions to edit company information.
 
 *NOTE: Changes to the policy boilerplate are reflected immediately in the next `GET /rendered_policy/<company_id>/<policy_id>`.*
 
@@ -200,9 +202,7 @@ The following contains a list of all the endpoints, as well as specific document
 - Request Arguments: JSON formatted data
 - Returns: Success response and `company_id` that was created
 
-##### EXAMPLE `curl -X POST http://localhost:5000/company -H "Content-Type: application/json" -d '{"name": "Googolplex AtoZ Data", "website": "stopdoingevilwheneverconvenient.com"}'`
-
-##### EXAMPLE (Windows) `curl -X POST http://localhost:5000/company -H "Content-Type: application/json" -d "{\"name\": \"Googolplex AtoZ Data\", \"website\": \"stopdoingevilwheneverconvenient.com\"}"`
+##### EXAMPLE `curl -X POST http://localhost:5000/company -H "Content-Type: application/json" -H "Authorization: Bearer <ACCESS_TOKEN>" -d '{"name": "Googolplex AtoZ Data", "website": "stopdoingevilwheneverconvenient.com"}'`
 
 Request Body Data:
 ```json
@@ -227,7 +227,7 @@ Returns:
 - Request Arguments: None
 - Returns: Success status and deleted `company_id`
 
-##### EXAMPLE `curl -X DELETE http://localhost:5000/company/52`
+##### EXAMPLE `curl -X DELETE http://localhost:5000/company/52 -H "Authorization: Bearer <ACCESS_TOKEN>"`
 
 ```json
 {
@@ -243,9 +243,7 @@ Returns:
 - Request Arguments: JSON formatted data
 - Returns: Success status
 
-##### EXAMPLE `curl -X PATCH http://localhost:5000/policy/2 -H "Content-Type: application/json" -d '{"name": "Better Cookie Policy Name", "body": "We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?"}'`
-
-##### EXAMPLE (Windows) `curl -X PATCH http://localhost:5000/policy/2 -H "Content-Type: application/json" -d "{\"name\": \"Better Cookie Policy Name\", \"body\": \"We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?\"}"`
+##### EXAMPLE `curl -X PATCH http://localhost:5000/policy/2 -H "Content-Type: application/json" -H "Authorization: Bearer <ACCESS_TOKEN>" -d '{"name": "Better Cookie Policy Name", "body": "We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?"}'`
 
 Request Body Data:
 ```json
