@@ -16,17 +16,18 @@ def setup_db(app, database_path=database_path):
     setup_db(app)
     binds a flask application and a SQLAlchemy service
     '''
+    # print(f"Using database_path={database_path}")
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
 
     # Turn this off after initial run or will keep overwriting database!
-    if 1:
+    if 0:
         db.drop_all()
         db.create_all()
         pop_policies()          # See below for initial policy population
-    if 1:
+    if 0:
         pop_mock_companies()    # See below.  Used only during development.
 
 

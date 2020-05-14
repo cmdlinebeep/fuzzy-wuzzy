@@ -32,10 +32,10 @@ def create_app(test_config=None):
     @app.route('/', methods=['GET'])
     def index():
         # https://dev.to/mrprofessor/rendering-markdown-from-flask-1l41
-        readme = open("README.md", "r")
-        md_template_string = markdown.markdown(
-            readme.read(), extensions=["fenced_code", "codehilite", "tables"]
-        )
+        with open("README.md", "r") as readme:
+            md_template_string = markdown.markdown(
+                readme.read(), extensions=["fenced_code", "codehilite", "tables"]
+            )
 
         # Generate css for syntax highlighting
         formatter = HtmlFormatter(style="emacs", full=True, cssclass="codehilite")

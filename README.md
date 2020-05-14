@@ -63,8 +63,9 @@ Sourcing setup.sh sets environment variables needed by Auth0 and the Flask app.
 
 To set up the local database with some initial data, run the following:
 ```bash
+# The password for user postgres is 'a'
 createdb -U postgres roboterms
-psql -U postgres roboterms < trivia.psql    # FIXME
+psql -U postgres roboterms < roboterms_test.sql
 ```
 
 The database can then be explored via:
@@ -74,7 +75,28 @@ psql roboterms postgres
 
 
 ## Running the Test Suite
-FIXME  use unittest (like class 3), not Postman
+To set up the database for the tests, run this the first time:
+```bash
+# The password for user postgres is 'a'
+createdb -U postgres roboterms_test
+psql -U postgres roboterms_test < roboterms_test.sql
+```
+
+*The password for the database is 'a'*
+
+NOTE: This is for user name "postgres."  If you need to change the user name for your system, replace `postgres` above with your user name.  You will also need to Find + Replace every instance of `postgres` in the file `roboterms_test.sql` and change it to your own user name.
+
+And then to run the unit tests, just run:
+```bash
+python test_app.py
+```
+
+If you ever mess up the test database somehow and need to restore it to a pristine state for testing, run the following.  Note that the current unit tests do not change the state of the database (e.g. any DB entries created for testing are cleaned up by the script too.)  So you shouldn't ever really need this:
+```bash
+dropdb roboterms_test & createdb roboterms_test
+psql -U postgres roboterms_test < roboterms_test.sql
+```
+``
 
 
 ## Check out a [live deployment on Heroku](FIXME)
