@@ -43,7 +43,17 @@ Anyone is allowed to read company information, policy information, or to read a 
 
 
 ## Authorization
-FIXME
+The project has been set up to authenticate using Auth0 tokens (JWTs).  These are set up and signed with Auth0's private key.  Their validity can be checked (by anyone) using their public keys.
+
+Two users have been set up in Auth0 to use the RoboTerms API, a Client and an Admin, who each have the necessary permissions to carry out typical tasks for each role.
+
+There are two ways to run the app, and therefore two different ways the tokens are generated.
+1. Locally
+    - When run locally either with `flask run` or doing unit testing with `python test_app.py`, the shell scripts `setup.sh` (and `setup_windows.bat`) contain the Client and Admin tokens necessary for testing.
+2. Live deployment on Heroku
+    - In this case the tokens will be set via Heroku Config Vars.
+
+#### NOTE for graders: According to Auth0, tokens for browser-based flows now can only be set to a maximum expiration of 24 hours!  
 
 
 ## Running the Server Locally
@@ -77,7 +87,9 @@ psql roboterms postgres
 ```
 
 
-## Running the Test Suite
+## Running the Test Suite Locally
+After running the above commands for running locally, do the following.
+
 To set up the database for the tests, run this the first time:
 ```bash
 # The password for user postgres is 'a'
@@ -111,7 +123,8 @@ OK
 ```                                                                                    
 
 
-## Check out a [live deployment on Heroku](FIXME)
+## Check out a [live deployment on Heroku](https://roboterms.herokuapp.com/)
+(App is on free plan and may be sleeping... give 5 seconds to wake up)
 
 
 ## Endpoint conventions and Error codes

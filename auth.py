@@ -9,7 +9,6 @@ from urllib.request import urlopen
 if not all([os.getenv('AUTH0_DOMAIN'), os.getenv('ALGORITHMS'), os.getenv('API_AUDIENCE')]):
     raise RuntimeError("Environment variables are not set, did you source setup.sh?")
 
-# FIXME: callback URL?
 AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')    # 'fsnd-joel.auth0.com'
 ALGORITHMS = [os.getenv('ALGORITHMS')]      # ['RS256'], a list, but just one here
 API_AUDIENCE = os.getenv('API_AUDIENCE')    # 'roboterms_api'

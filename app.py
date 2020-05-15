@@ -19,12 +19,8 @@ def create_app(test_config=None):
     app = Flask(__name__)
     CORS(app)   # Allow all origins
 
-    # FIXME: add access-control-allow authorization header?  Like coffee shop project.
-
     # Set up the database first
     setup_db(app)
-
-    # FIXME:  migrate = Migrate(app, db)  ?
 
     @app.route('/', methods=['GET'])
     def index():
