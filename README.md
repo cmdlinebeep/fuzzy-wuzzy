@@ -2,7 +2,7 @@
 ## Programmatically generate website Terms of Service and other Policies
 
 ## About
-This is my capstone project submission for Udacity's Full-Stack web developer Nanodegree.  
+This is my capstone project submission for Udacity's Full-Stack web developer Nanodegree.
 
 Nowadays, especially with passing of GPDR and other similar legislation, it's important that most commercial websites have a Privacy Policy, Terms of Service, or other site usage restrictions.  Consumers want to know, and deserve to know, what site owners are allowed to do with your data.
 
@@ -11,6 +11,9 @@ Well, you can toss out your lawyer, because the RoboTerms API can quickly and ea
 Want to add a new policy to your site?  Easy.  Call the `rendered_policy` endpoint, and just paste the response text to your own site HTML.
 
 ![Robot Scholar](https://github.com/cmdlinebeep/roboterms/blob/master/robo-scholar.jpg?raw=true)
+
+*Please note, these are actually just toy policies for an assignment.  DO NOT USE THEM FOR ANY COMMERCIAL PROJECTS!*
+
 
 ### Policies Currently Supported
 - Terms of Service.  What are the terms users agree to when they use your site?  Prevent abuse of your site.
@@ -48,12 +51,14 @@ The project has been set up to authenticate using Auth0 tokens (JWTs).  These ar
 Two users have been set up in Auth0 to use the RoboTerms API, a Client and an Admin, who each have the necessary permissions to carry out typical tasks for each role.
 
 There are two ways to run the app, and therefore two different ways the tokens are generated.
-1. Locally
-    - When run locally either with `flask run` or doing unit testing with `python test_app.py`, the shell scripts `setup.sh` (and `setup_windows.bat`) contain the Client and Admin tokens necessary for testing.
-2. Live deployment on Heroku
-    - In this case the tokens will be set via Heroku Config Vars.
+1. **Locally.**  When run locally either with `flask run` or doing unit testing with `python test_app.py`, the shell scripts `setup.sh` (and `setup_windows.bat`) contain the Client and Admin tokens necessary for testing.
+2. **Live deployment on Heroku.**  To test the live Heroku deployment, use the example `curl` calls in the below documentation, but take care to substitute the values for `<CLIENT_TOKEN>` and `<ADMIN_TOKEN>` in the `curl` examples with the ones found in `setup.sh`.  You'll also need to replace `http://localhost:5000` in the command with `https://roboterms.herokuapp.com/`
 
 #### NOTE for graders: According to Auth0, tokens for browser-based flows now can only be set to a maximum expiration of 24 hours!  
+
+
+## Check out a [live deployment on Heroku](https://roboterms.herokuapp.com/)
+(App is on free plan and may be sleeping... give 5 seconds to wake up)
 
 
 ## Running the Server Locally
@@ -66,7 +71,7 @@ python -m pip install -r requirements.txt
 ```
 
 On Windows, environment variables are exported differently:
-```bash
+```console
 .\setup_windows.bat
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
@@ -114,17 +119,13 @@ psql -U postgres roboterms_test < roboterms_test.sql
 
 EXAMPLE
 ```bash
-(venv) λ python test_app.py                                                                 
-........................                                                                    
-----------------------------------------------------------------------                      
-Ran 24 tests in 5.756s                                                                      
-                                                                                            
+python test_app.py
+........................
+----------------------------------------------------------------------
+Ran 24 tests in 5.756s
+
 OK
-```                                                                                    
-
-
-## Check out a [live deployment on Heroku](https://roboterms.herokuapp.com/)
-(App is on free plan and may be sleeping... give 5 seconds to wake up)
+```
 
 
 ## Endpoint conventions and Error codes
@@ -249,7 +250,7 @@ The following contains a list of all the endpoints, as well as specific document
 - Request Arguments: JSON formatted data
 - Returns: Success response and `company_id` that was created
 
-##### EXAMPLE `curl -X POST http://localhost:5000/company -H "Content-Type: application/json" -H "Authorization: Bearer <ACCESS_TOKEN>" -d '{"name": "Googolplex AtoZ Data", "website": "stopdoingevilwheneverconvenient.com"}'`
+##### EXAMPLE `curl -X POST http://localhost:5000/company -H "Content-Type: application/json" -H "Authorization: Bearer <CLIENT_TOKEN>" -d '{"name": "Googolplex AtoZ Data", "website": "stopdoingevilwheneverconvenient.com"}'`
 
 Request Body Data:
 ```json
@@ -274,7 +275,7 @@ Returns:
 - Request Arguments: None
 - Returns: Success status and deleted `company_id`
 
-##### EXAMPLE `curl -X DELETE http://localhost:5000/company/52 -H "Authorization: Bearer <ACCESS_TOKEN>"`
+##### EXAMPLE `curl -X DELETE http://localhost:5000/company/52 -H "Authorization: Bearer <CLIENT_TOKEN>"`
 
 ```json
 {
@@ -290,7 +291,7 @@ Returns:
 - Request Arguments: JSON formatted data
 - Returns: Success status
 
-##### EXAMPLE `curl -X PATCH http://localhost:5000/policy/2 -H "Content-Type: application/json" -H "Authorization: Bearer <ACCESS_TOKEN>" -d '{"name": "Better Cookie Policy Name", "body": "We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?"}'`
+##### EXAMPLE `curl -X PATCH http://localhost:5000/policy/2 -H "Content-Type: application/json" -H "Authorization: Bearer <ADMIN_TOKEN>" -d '{"name": "Better Cookie Policy Name", "body": "We get it.  You track us and we have to click OK or click 'more options' and lets face it, nobody ever does that.  Does that button even function?"}'`
 
 Request Body Data:
 ```json

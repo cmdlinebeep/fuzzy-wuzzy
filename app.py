@@ -8,6 +8,8 @@ from flask_cors import CORS
 import markdown
 import markdown.extensions.fenced_code  # Supports GitHub's backtick (```code```) blocks
 import markdown.extensions.codehilite   # Code highlighting: Python, JSON
+import markdown.extensions.tables       # Format tables better in HTML
+import markdown.extensions.sane_lists   # Make bulleted list formatting in HTML better
 from pygments.formatters import HtmlFormatter
 
 # My modules
@@ -27,7 +29,7 @@ def create_app(test_config=None):
         # https://dev.to/mrprofessor/rendering-markdown-from-flask-1l41
         with open("README.md", "r") as readme:
             md_template_string = markdown.markdown(
-                readme.read(), extensions=["fenced_code", "codehilite", "tables"]
+                readme.read(), extensions=["fenced_code", "codehilite", "tables", "sane_lists"]
             )
 
         # Generate css for syntax highlighting
